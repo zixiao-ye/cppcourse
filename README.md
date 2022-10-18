@@ -95,11 +95,14 @@ The output should be:
 > origin  git@gitlab.lrz.de:cppcourse/ws2022/your-username_tasks.git (fetch)
 > origin  git@gitlab.lrz.de:cppcourse/ws2022/your-username_tasks.git (push)
 ```
-which tells us, that remote with the name origin (your GitLab repo) points to your local repo. To add the [base repo](https://gitlab.lrz.de/cppcourse/ws2022/tasks) use:
+which tells us, that your local git repo knows a remote git repo with the name `origin`, which is your personal GitLab repo.
+
+Now you need to add "[the course organizer's](https://gitlab.lrz.de/cppcourse/ws2022/tasks)" repo so you can get new tasks from us.
+To register it as a new remote repo, run:
 ```console
 $ git remote add upstream git@gitlab.lrz.de:cppcourse/ws2022/tasks.git
 ```
-This command adds a the base repo as `upstream`.
+Now you've added our git base repo as `upstream`.
 Again, you can verify that it was added:
 ```console
 $ git remote -v
@@ -111,6 +114,8 @@ $ git remote -v
 With this configuration, your local `git` repo can now talk to two independent remote `git` repositories:
 * `origin` is your repo on GitLab, where you commit your homework results
 * `upstream` is our repo on GitLab, where we publish new assignments
+
+So you're now dealing with **3 repos**: Your local repo, your submission remote repo, and the new-tasks remote repo.
 
 
 
