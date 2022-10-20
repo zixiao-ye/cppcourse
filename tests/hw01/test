@@ -1,0 +1,40 @@
+#!/bin/bash
+
+
+DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $DIR/../../  # repo root
+
+testfile="./build/hw01"
+
+if [[ ! -x "$testfile" ]]; then
+    echo "executable file '$testfile' not found"
+    exit 1
+fi
+
+output=$($testfile)
+
+if [[ "$output" == "42" ]]; then
+    echo "output test passed!"
+else
+    echo "output test failed! output was:"
+    echo $output
+    exit 1
+fi
+
+testfile="./build/test01"
+
+if [[ ! -x "$testfile" ]]; then
+    echo "executable file '$testfile' not found"
+    exit 1
+fi
+
+$testfile
+retcode=$?
+if [[ $retcode -eq 0 ]]; then
+    echo "return test passed!"
+else
+    echo "return test failed: $retcode"
+    exit 1
+fi
+
+

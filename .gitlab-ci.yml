@@ -1,0 +1,78 @@
+variables:
+    CURRENT_HW: "hw01"
+    CURRENT_TEST: "testhw01"
+    TEST_HASH_EXPECTED: "5c7c8bff397ccbbb21ac37f75d8e5291d9e0dfc04b173a330ef7c94356471b9f"
+
+# pre-verify test system hash
+before_script:
+  - tester="python3 -c 'import base64, lzma; exec(lzma.decompress(base64.b64decode(\"/Td6WFoAAATm1rRGAgAhARYAAAB0L+Wj4AN1AaNdAAUbSxPKKmVtGhRPQtvDy44ev3OIPm3q08xy0m1+Vzts/YuDUpfq1D15P9KyY1ltIZb4nnvSxakQAJy1iSkSn0CSwxAcZ9BdnVKenS6RtGMtxaPfI4+FwrOfdwPZUVPktXnaYcFn4bVa3hvnOJxmO4w8WujSjqrSI4IyI2j1d6dwwpL4qBlgvcn6q8B6KU/KbmlIgAAdpN7LNlBnEqIdk40AntOo9T78J0EcddwODxBjtMVoV2ClCj6u5kgg7/i9CaBoQz3deUx205aCsVgBvu8nQV/TZYnVSzIiZ5Q3OxMpl3Xu8Jmp6h4xGF/8OoHFyKfGxIKfHcp9Hv/Q+zDJD6UYfOWKYUjr4OAmt24vturwp9q7XNQCZgsYPLAYSGTv/B0KiXtVx8hgDrGdJlD/+UbPiotERiswHUFiyfQV9Lr9h2X6D6YXH5JckS6TiKPsCtQH8Sxa7CZqj1PGar2+ni/M88ix5nD4ihBcFuI2QrHvbNeFwXO6CJ1SsFJRKQwuKkIBSOEHpPr2AwLIrshKW1Alx6/TDYaZFDTLd77GLTvvVHJuAABXl4lW9tWghQABvwP2BgAAZDrpyLHEZ/sCAAAAAARZWg==\")).decode())'"
+  - TEST_HASH=$(eval "$tester" . tests/)
+
+  - echo $TEST_HASH
+  - echo $TEST_HASH_EXPECTED
+  - if [[ "$TEST_HASH" == "$TEST_HASH_EXPECTED" ]]; then echo "hash ok for tests/"; else echo -n "contents of tests/ are not as expected! to fix this, git restore -s upstream/master tests/ .gitlab-ci.yml"; exit 1; fi
+  - export GCC_COLORS=yes
+
+stages:
+- compile
+- test
+
+# yaml template lol
+.job_template: &build_job_artifact
+  stage: compile
+  cache:
+    key: "$CI_JOB_NAME"
+    paths:
+      - build/
+
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    paths:
+      - build/
+    expire_in: 30 mins
+
+
+# compile jobs
+build-gcc:
+  <<: *build_job_artifact
+  image: cpp/compiler:20
+  script:
+    - CXX=g++ ./tests/hw01/compile
+  tags:
+    - linux
+
+build-clang:
+  <<: *build_job_artifact
+  image: cpp/compiler:20
+  script:
+    - CXX=clang++ CXXFLAGS="-stdlib=libc++ -Wl,-lc++abi" ./tests/hw01/compile
+  tags:
+    - linux
+
+
+# test jobs
+test-gcc:
+  stage: test
+  image: cpp/compiler:20
+  script:
+    - ./tests/hw01/test
+  dependencies:
+    - build-gcc
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    when: always
+    paths:
+      - build/ctest.log
+    expire_in: 1 year
+  tags:
+    - linux
+
+test-clang:
+  stage: test
+  image: cpp/compiler:20
+  script:
+    - ./tests/hw01/test
+  dependencies:
+    - build-clang
+  tags:
+    - linux

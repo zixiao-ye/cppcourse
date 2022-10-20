@@ -1,0 +1,20 @@
+#!/bin/bash
+
+
+set -e
+DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+HWDIR=../../hw01
+BUILDDIR=$DIR/../../build
+
+COMPILER=${CXX:-g++}
+
+set -x
+cd $DIR
+mkdir -p $BUILDDIR/
+$COMPILER $CXXFLAGS -std=c++20 -Wall -Wextra -shared -o $BUILDDIR/liblibrary.so $HWDIR/library.cpp
+$COMPILER $CXXFLAGS -std=c++20 -Wall -Wextra -I $HWDIR -c -o $BUILDDIR/hw01.o $HWDIR/hw01.cpp
+$COMPILER $CXXFLAGS -std=c++20 -Wall -Wextra -L $BUILDDIR -Wl,-rpath $BUILDDIR $BUILDDIR/hw01.o -llibrary -o $BUILDDIR/hw01
+
+$COMPILER $CXXFLAGS -std=c++20 -Wall -Wextra -I $HWDIR -c -o $BUILDDIR/test01.o test01.cpp
+$COMPILER $CXXFLAGS -std=c++20 -Wall -Wextra -L $BUILDDIR -Wl,-rpath $BUILDDIR $BUILDDIR/test01.o -llibrary -o $BUILDDIR/test01
+
