@@ -1,17 +1,18 @@
 variables:
-    CURRENT_HW: "hw01"
-    CURRENT_TEST: "testhw01"
-    TEST_HASH_EXPECTED: "5c7c8bff397ccbbb21ac37f75d8e5291d9e0dfc04b173a330ef7c94356471b9f"
+    CURRENT_HW: "hw02"
+    CURRENT_TEST: "testhw02"
+    TEST_HASH_EXPECTED: "024ee07452e3cd57e5e8af6fc6c2b9c630c9da3c174336c31e8647d8d5924747"
 
 # pre-verify test system hash
 before_script:
-  - tester="python3 -c 'import base64, lzma; exec(lzma.decompress(base64.b64decode(\"/Td6WFoAAATm1rRGAgAhARYAAAB0L+Wj4AN1AaNdAAUbSxPKKmVtGhRPQtvDy44ev3OIPm3q08xy0m1+Vzts/YuDUpfq1D15P9KyY1ltIZb4nnvSxakQAJy1iSkSn0CSwxAcZ9BdnVKenS6RtGMtxaPfI4+FwrOfdwPZUVPktXnaYcFn4bVa3hvnOJxmO4w8WujSjqrSI4IyI2j1d6dwwpL4qBlgvcn6q8B6KU/KbmlIgAAdpN7LNlBnEqIdk40AntOo9T78J0EcddwODxBjtMVoV2ClCj6u5kgg7/i9CaBoQz3deUx205aCsVgBvu8nQV/TZYnVSzIiZ5Q3OxMpl3Xu8Jmp6h4xGF/8OoHFyKfGxIKfHcp9Hv/Q+zDJD6UYfOWKYUjr4OAmt24vturwp9q7XNQCZgsYPLAYSGTv/B0KiXtVx8hgDrGdJlD/+UbPiotERiswHUFiyfQV9Lr9h2X6D6YXH5JckS6TiKPsCtQH8Sxa7CZqj1PGar2+ni/M88ix5nD4ihBcFuI2QrHvbNeFwXO6CJ1SsFJRKQwuKkIBSOEHpPr2AwLIrshKW1Alx6/TDYaZFDTLd77GLTvvVHJuAABXl4lW9tWghQABvwP2BgAAZDrpyLHEZ/sCAAAAAARZWg==\")).decode())'"
-  - TEST_HASH=$(eval "$tester" . tests/)
+  - tester="python3 -c 'import base64, lzma; exec(lzma.decompress(base64.b64decode(\"/Td6WFoAAATm1rRGAgAhARYAAAB0L+Wj4ANoAZpdAAUbSxPKKmVtGhRPQtvDy44ev3OIPm3q08xy0m1+Vzts/YuDUpfq1D15P9KyY1ltIZb4nnvSxakQAJy1iSkSn0CSwxAcZ9BdnVKenS6RtGMtxaPfI4+FwrOfdwPZUVPktXnaYcFn4bVa3hvnOJxmO4w8WujSjqrSI4IyI2j1d6dwwpL4qBlgvcn6q8B6KU/KbmlIgAAdpN7LNlBnEqIdk40AntOo9T78J0EcddwODxBjtMVoV2ClCj6u5kgg7/i9CaBoQz3deUx205aCsVgBvu8nQV/TZYnVSzIih59lrhlBmnijJ0wqfxzukLTWsFkOZWH1nxKlAlQsuRo37dzsJ6YAlfFvHwZEz/0p4jWSqATRPxq2af1QWvY7uebFtE2bJQUbvqK1u7f75ItWPMZI2ySib7iRN/X8eyBTrqLhWASCGbJVosnNs0aTSSXA3axFRqTSLg8tS2A/a/HnRZGTQvOiWXw3m7FMMxPWuAkOZSdhCz02leqZUghcY11NFRmgG7ji0rVPQsCqOUwJI9lnkR6evCqsPMx83RaSAAAAH2FED2Xm7QEAAbYD6QYAAGUsnOexxGf7AgAAAAAEWVo=\")).decode())'"
+  - TEST_HASH=$(eval "$tester" . tests/ CMakeLists.txt)
 
   - echo $TEST_HASH
   - echo $TEST_HASH_EXPECTED
-  - if [[ "$TEST_HASH" == "$TEST_HASH_EXPECTED" ]]; then echo "hash ok for tests/"; else echo -n "contents of tests/ are not as expected! to fix this, git restore -s upstream/master tests/ .gitlab-ci.yml"; exit 1; fi
+  - if [[ "$TEST_HASH" == "$TEST_HASH_EXPECTED" ]]; then echo "/CMakeLists.txt and tests/ folder are good!"; else echo -n "/CMakeLists.txt or test/ folder contents are not as expected! to fix this, git restore -s upstream/master CMakeLists.txt tests/ .gitlab-ci.yml"; exit 1; fi
   - export GCC_COLORS=yes
+
 
 stages:
 - compile
@@ -37,7 +38,10 @@ build-gcc:
   <<: *build_job_artifact
   image: cpp/compiler:20
   script:
-    - CXX=g++ ./tests/hw01/compile
+    - mkdir -p build
+    - cd build
+    - cmake ..
+    - make $CURRENT_HW ${CURRENT_TEST} -j4 VERBOSE=1
   tags:
     - linux
 
@@ -45,7 +49,10 @@ build-clang:
   <<: *build_job_artifact
   image: cpp/compiler:20
   script:
-    - CXX=clang++ CXXFLAGS="-stdlib=libc++ -Wl,-lc++abi" ./tests/hw01/compile
+    - mkdir -p build
+    - cd build
+    - cmake .. -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-lc++abi"
+    - make $CURRENT_HW ${CURRENT_TEST} -j4 VERBOSE=1
   tags:
     - linux
 
@@ -55,7 +62,8 @@ test-gcc:
   stage: test
   image: cpp/compiler:20
   script:
-    - ./tests/hw01/test
+    - cd build
+    - ctest -R $CURRENT_HW -V -O ctest.log
   dependencies:
     - build-gcc
   artifacts:
@@ -71,7 +79,8 @@ test-clang:
   stage: test
   image: cpp/compiler:20
   script:
-    - ./tests/hw01/test
+    - cd build
+    - ctest -R $CURRENT_HW -V -O ctest.log
   dependencies:
     - build-clang
   tags:
