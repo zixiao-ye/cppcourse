@@ -1,7 +1,7 @@
 variables:
-    CURRENT_HW: "hw02"
-    CURRENT_TEST: "testhw02"
-    TEST_HASH_EXPECTED: "024ee07452e3cd57e5e8af6fc6c2b9c630c9da3c174336c31e8647d8d5924747"
+    CURRENT_HW: "hw03"
+    CURRENT_TEST: "testhw03"
+    TEST_HASH_EXPECTED: "33e7c185b6557f83e82c481bd822eae5422950a703190add25c91f41b13b6ea1"
 
 # pre-verify test system hash
 before_script:
