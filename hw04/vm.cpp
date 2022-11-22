@@ -23,6 +23,167 @@ vm_state create_vm(bool debug) {
 
 
     // TODO create instructions
+    register_instruction(state, "LOAD_CONST", [](vm_state& vmstate, const item_t arg) {
+        vmstate.stack.push(arg);
+        return true;
+    });
+
+    register_instruction(state, "ADD", [](vm_state& vmstate, const item_t /*arg*/) {
+        if (vmstate.stack.size() < 2)
+        {
+            throw vm_stackfail{"Not enough stack items!"};
+        }
+        
+        item_t tos = vmstate.stack.top();
+        vmstate.stack.pop();
+        item_t tos1 = vmstate.stack.top();
+        vmstate.stack.pop();
+        vmstate.stack.push(tos+tos1);
+        return true;
+    });
+
+    register_instruction(state, "EXIT", [](vm_state& vmstate, const item_t /*arg*/) {
+        if (vmstate.stack.size() < 1)
+        {
+            throw vm_stackfail{"Not enough stack items!"};
+        }
+        
+        item_t tos = vmstate.stack.top();
+        return tos;
+    });
+
+    register_instruction(state, "POP", [](vm_state& vmstate, const item_t /*arg*/) {
+        if (vmstate.stack.size() < 1)
+        {
+            throw vm_stackfail{"Not enough stack items!"};
+        }
+        
+        vmstate.stack.pop();
+        return true;
+    });
+
+    register_instruction(state, "DIV", [](vm_state& vmstate, const item_t /*arg*/) {
+        if (vmstate.stack.size() < 2)
+        {
+            throw vm_stackfail{"Not enough stack items!"};
+        }
+
+        item_t tos = vmstate.stack.top();
+        vmstate.stack.pop();
+        item_t tos1 = vmstate.stack.top();
+        vmstate.stack.pop();
+
+        if (tos == 0)
+        {
+            div_by_zero err("Divided by zero!");
+            throw err;
+        }
+        else
+        {
+            item_t result{tos1/tos};
+            vmstate.stack.push(result);
+        }
+
+        return true;
+    });
+
+    register_instruction(state, "EQ", [](vm_state& vmstate, const item_t /*arg*/) {
+        if (vmstate.stack.size() < 2)
+        {
+            throw vm_stackfail{"Not enough stack items!"};
+        }
+
+        item_t tos = vmstate.stack.top();
+        vmstate.stack.pop();
+        item_t tos1 = vmstate.stack.top();
+        vmstate.stack.pop();
+        if (tos == tos1)
+        {
+            vmstate.stack.push(1);
+        }
+        else
+        {
+            vmstate.stack.push(0);
+        }
+        
+        return true;
+    });
+
+    register_instruction(state, "NEQ", [](vm_state& vmstate, const item_t /*arg*/) {
+        if (vmstate.stack.size() < 2)
+        {
+            throw vm_stackfail{"Not enough stack items!"};
+        }
+
+        item_t tos = vmstate.stack.top();
+        vmstate.stack.pop();
+        item_t tos1 = vmstate.stack.top();
+        vmstate.stack.pop();
+        if (tos == tos1)
+        {
+            vmstate.stack.push(0);
+        }
+        else
+        {
+            vmstate.stack.push(1);
+        }
+        
+        return true;
+    });
+
+    register_instruction(state, "DUP", [](vm_state& vmstate, const item_t /*arg*/) {
+        if (vmstate.stack.size() < 1)
+        {
+            throw vm_stackfail{"Not enough stack items!"};
+        }
+
+        item_t tos = vmstate.stack.top();
+        vmstate.stack.push(tos);
+        return true;
+    });
+
+    register_instruction(state, "JMP", [](vm_state& vmstate, const item_t addr) {
+        vmstate.pc = size_t(addr);
+        return true;
+    });
+
+    register_instruction(state, "JMPZ", [](vm_state& vmstate, const item_t addr) {
+        if (vmstate.stack.size() < 1)
+        {
+            throw vm_stackfail{"Not enough stack items!"};
+        }
+
+        item_t tos = vmstate.stack.top();
+        vmstate.stack.pop();
+        if (tos == 0)
+        {
+            vmstate.pc = size_t(addr);
+        }
+        
+        return true;
+    });
+
+    register_instruction(state, "WRITE", [](vm_state& vmstate, const item_t /*arg*/) {
+        if (vmstate.stack.size() < 1)
+        {
+            throw vm_stackfail{"Not enough stack items!"};
+        }
+
+        item_t tos = vmstate.stack.top();
+        vmstate.output_string += std::to_string(tos);
+        return true;
+    });
+
+    register_instruction(state, "WRITE_CHAR", [](vm_state& vmstate, const item_t /*arg*/) {
+        if (vmstate.stack.size() < 1)
+        {
+            throw vm_stackfail{"Not enough stack items!"};
+        }
+
+        item_t tos = vmstate.stack.top();
+        vmstate.output_string += static_cast<char>(tos);
+        return true;
+    });
 
     return state;
 }
@@ -33,6 +194,10 @@ void register_instruction(vm_state& state, std::string_view name,
     size_t op_id = state.next_op_id;
 
     // TODO make instruction available to vm
+    state.next_op_id++;
+    state.instruction_ids.insert(std::pair{name, op_id});
+    state.instruction_names.insert(std::pair{op_id, name});
+    state.instruction_actions.insert(std::pair{op_id, action});
 }
 
 
@@ -102,9 +267,27 @@ std::tuple<item_t, std::string> run(vm_state& vm, const code_t& code) {
         vm.pc += 1;
 
         // TODO execute instruction and stop if the action returns false.
+
+        // auto search = vm.instruction_ids.find(op_id);
+
+        // if (search == vm.instruction_ids.end())
+        // {
+        //     throw invalid_instruction{"Invalid instruction!"};
+        // }
+        
+        vm.instruction_actions[op_id](vm, arg);
+
+        if ((vm.instruction_names[op_id] == "JMP" || vm.instruction_names[op_id] == "JMPZ") && (vm.pc < 0 || vm.pc >= code.size()))
+        {
+            throw vm_segfault{"Non-existent program address!"};
+        }
+
+        if(vm.instruction_names[op_id] == "EXIT"){
+            break;
+        }
     }
 
-    return {0, ""}; // TODO: return tuple(exit value, output text)
+    return std::make_tuple(vm.stack.top(), vm.output_string); // TODO: return tuple(exit value, output text)
 }
 
 
