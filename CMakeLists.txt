@@ -61,4 +61,4 @@ endif()
 
 #------- homework code inclusion -------
 
-add_subdirectory("hw06")
+add_subdirectory("hw07")
