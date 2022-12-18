@@ -160,7 +160,7 @@ int main() {
   std::cout << fs.file_overview() << std::endl;
 
   // test your implementation interactively here
-  // interactive_test(fs);
+  interactive_test(fs);
 
   return 0;
 }

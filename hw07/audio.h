@@ -10,6 +10,12 @@ public:
   Audio(FileContent &&content = {}, unsigned duration = 0);
 
   // TODO: more member functions
+  size_t get_raw_size() const;
+
+  std::string_view get_type() const;
+
+  size_t get_size() const;
+
   /**
    * Get the duration of this audio file.
    */

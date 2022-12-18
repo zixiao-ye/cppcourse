@@ -73,11 +73,14 @@ protected:
     FileContent content;
 
     // TODO additional member variables
+    std::string type;
+    // std::shared_ptr<Filesystem> filesystem{nullptr};
+    Filesystem *filesystem{nullptr};
 
 private:
     /**
      * The file name.
      * Is empty as long as the file is not registered in a filesystem.
      */
-    std::string name;
+    std::string name="";
 };
