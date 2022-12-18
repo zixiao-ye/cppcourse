@@ -19,10 +19,11 @@ bool Filesystem::register_file(const std::string &name,
   {
     return false;
   }
-  if (file->filesystem != nullptr || name == "")
+  if (file->filesystem.use_count() != 0 || name == "")
   {
     return false;
   }
+
   for (auto temp : files)
   {
     if (temp->name == name)
@@ -31,8 +32,7 @@ bool Filesystem::register_file(const std::string &name,
     }
   }
   
-  // file->filesystem = std::move(thisptr);
-  file->filesystem = this;
+  file->filesystem = std::move(thisptr);
 
   // TODO: More updates you need to do!
   file -> name = name;
@@ -47,7 +47,7 @@ bool Filesystem::remove_file(std::string_view name) {
   for(auto file: files){
     if (file->name == name)
     {
-      file->filesystem = nullptr;
+      file->filesystem = std::weak_ptr<Filesystem>();
       files.erase(remove_if(files.begin(), files.end(), [&name](auto f){return f->name == name;}), files.end());
       return true;
     }

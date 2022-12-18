@@ -7,10 +7,10 @@ size_t File::get_size() const { return this->content.get_size(); }
 
 bool File::rename(std::string_view new_name) {
   // TODO: file renaming
-  if(name == "" || name == new_name || filesystem->in_use() == 0){
+  if(name == "" || name == new_name || this->filesystem.use_count() == 0){
     return false;
   }
-  // std::cout<<filesystem->in_use()<<std::endl;
+
   name = new_name;
   return true;
 }

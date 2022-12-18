@@ -75,7 +75,8 @@ protected:
     // TODO additional member variables
     std::string type;
     // std::shared_ptr<Filesystem> filesystem{nullptr};
-    Filesystem *filesystem{nullptr};
+    // Filesystem *filesystem{nullptr};
+    std::weak_ptr<Filesystem> filesystem;
 
 private:
     /**
