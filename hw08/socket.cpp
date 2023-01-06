@@ -9,7 +9,7 @@ namespace net{
     bool is_listening(int fd){
         int val;
         socklen_t len = sizeof(val);
-        int errn = getsockopt(fd, SOL_SOCKET, SO_ACCEPTCONN, &val, &len);
+        int errn = getsockopt(fd, SOL_SOCKET, SO_ACCEPTCONN, NULL, 0);
         if(errn == 0){
             std::cout<<"Success listening!"<<std::endl;
         }
