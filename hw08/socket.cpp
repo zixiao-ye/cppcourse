@@ -73,7 +73,7 @@ namespace net{
         hints.ai_next = NULL;
         std::string p = std::to_string(port);
         std::string destination = "127.0.0.1";
-	    auto errn = getaddrinfo((char*)&destination, (char*)&p, NULL, &host);
+	    auto errn = getaddrinfo((char*)&destination, (char*)&p, &hints, &host);
         if(errn == 0){
             std::cout<<"Success getaddrinfo!"<<p<<std::endl;
         }
