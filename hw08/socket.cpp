@@ -7,7 +7,15 @@
 
 namespace net{
     bool is_listening(int fd){
-        return getsockopt(fd, SOL_SOCKET, SO_ACCEPTCONN, 0, 0) == 0;
+        // return getsockopt(fd, SOL_SOCKET, SO_ACCEPTCONN, 0, 0) == 0;
+        auto errn = getsockopt(fd, SOL_SOCKET, SO_ACCEPTCONN, NULL, 0);
+        if(errn == 0){
+            std::cout<<"Success!"<<std::endl;
+        }
+        else{
+            std::cout<<"Failure!"<<gai_strerror(errn)<<std::endl;
+        }
+        return errn;
     }
 
     Socket::Socket(){
