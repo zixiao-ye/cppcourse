@@ -10,6 +10,8 @@ namespace net {
  */
 class Client {
 public:
+    Client();
+
     Connection connect(std::string destination, uint16_t port);
 
     Connection connect(uint16_t port);
