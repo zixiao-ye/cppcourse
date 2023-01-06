@@ -9,14 +9,14 @@ namespace net{
     bool is_listening(int fd){
         int val;
         socklen_t len = sizeof(val);
-        int errn = getsockopt(fd, SOL_SOCKET, SO_ACCEPTCONN, NULL, 0);
-        if(errn == 0){
+        int errn = getsockopt(fd, SOL_SOCKET, SO_ACCEPTCONN, &val, &len);
+        if(val){
             std::cout<<"Success listening!"<<std::endl;
         }
-        else if(errn == -1){
-            std::cout<<"Failure listening!"<<gai_strerror(errn)<<std::endl;
+        else{
+            std::cout<<"Failure listening!"<<val<<gai_strerror(errn)<<std::endl;
         }
-        return errn == 0;
+        return val;
     }
 
     Socket::Socket(){
