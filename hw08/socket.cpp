@@ -61,7 +61,15 @@ namespace net{
     }
 
     Connection Socket::connect(uint16_t port){
-        struct addrinfo *host;
+        struct addrinfo *host,hints;
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_family = AF_INET;    /* Allow IPv4 or IPv6 */
+        hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
+        hints.ai_flags = AI_PASSIVE;    /* For wildcard IP address */
+        hints.ai_protocol = 0;          /* Any protocol */
+        hints.ai_canonname = NULL;
+        hints.ai_addr = NULL;
+        hints.ai_next = NULL;
         std::string p = std::to_string(port);
 	    auto errn = getaddrinfo("127.0.0.1", (char*)&p, NULL, &host);
         if(errn == 0){
