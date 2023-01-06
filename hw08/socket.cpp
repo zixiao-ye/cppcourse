@@ -65,10 +65,10 @@ namespace net{
         std::string p = std::to_string(port);
 	    auto errn = getaddrinfo("127.0.0.1", (char*)&p, NULL, &host);
         if(errn == 0){
-            // std::cout<<"Success!"<<p<<std::endl;
+            std::cout<<"Success getaddrinfo!"<<p<<std::endl;
         }
         else{
-            // std::cout<<"Failure!"<<gai_strerror(errn)<<std::endl;
+            std::cout<<"Failure getaddrinfo!"<<gai_strerror(errn)<<std::endl;
         }
         if(::connect(fd(), host->ai_addr, host->ai_addrlen) == 0){
             std::cout<<"Success connect!"<<std::endl;

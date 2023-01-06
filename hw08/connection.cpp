@@ -41,7 +41,7 @@ namespace net{
 
     ssize_t Connection::receive_all(std::ostream& stream) const{
         char *buf=(char *)malloc(BUFLEN);
-        auto len = recv(fd(), buf, BUFLEN, 0);
+        auto len = recv(fd(), buf, BUFLEN, MSG_WAITALL);
         stream<<buf;
         free(buf);
         return len;
