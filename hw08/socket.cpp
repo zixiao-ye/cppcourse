@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <iostream>
+#include<cstring>
 
 namespace net{
     bool is_listening(int fd){
