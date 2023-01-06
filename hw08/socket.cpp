@@ -7,15 +7,16 @@
 
 namespace net{
     bool is_listening(int fd){
-        // return getsockopt(fd, SOL_SOCKET, SO_ACCEPTCONN, 0, 0) == 0;
-        auto errn = getsockopt(fd, SOL_SOCKET, SO_ACCEPTCONN, NULL, 0);
+        int val;
+        socklen_t len = sizeof(val);
+        int errn = getsockopt(fd, SOL_SOCKET, SO_ACCEPTCONN, &val, &len);
         if(errn == 0){
             std::cout<<"Success!"<<std::endl;
         }
-        else{
+        else if(errn == -1){
             std::cout<<"Failure!"<<gai_strerror(errn)<<std::endl;
         }
-        return errn;
+        return errn == 0;
     }
 
     Socket::Socket(){
@@ -64,16 +65,16 @@ namespace net{
         std::string p = std::to_string(port);
 	    auto errn = getaddrinfo("127.0.0.1", (char*)&p, NULL, &host);
         if(errn == 0){
-            std::cout<<"Success!"<<p<<std::endl;
+            // std::cout<<"Success!"<<p<<std::endl;
         }
         else{
-            std::cout<<"Failure!"<<gai_strerror(errn)<<std::endl;
+            // std::cout<<"Failure!"<<gai_strerror(errn)<<std::endl;
         }
         if(::connect(fd(), host->ai_addr, host->ai_addrlen) == 0){
             std::cout<<"Success!"<<std::endl;
         }
         else{
-            std::cout<<"Failure!"<<errno<<std::endl;
+            std::cout<<"Failure!"<<errno<<gai_strerror(errn)<<std::endl;
         }
         return Connection{std::move(fd_)};
     }
