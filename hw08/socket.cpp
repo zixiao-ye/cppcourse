@@ -11,10 +11,10 @@ namespace net{
         socklen_t len = sizeof(val);
         int errn = getsockopt(fd, SOL_SOCKET, SO_ACCEPTCONN, &val, &len);
         if(errn == 0){
-            std::cout<<"Success!"<<std::endl;
+            std::cout<<"Success listening!"<<std::endl;
         }
         else if(errn == -1){
-            std::cout<<"Failure!"<<gai_strerror(errn)<<std::endl;
+            std::cout<<"Failure listening!"<<gai_strerror(errn)<<std::endl;
         }
         return errn == 0;
     }
@@ -43,7 +43,7 @@ namespace net{
         }
         struct	sockaddr_in fsin;
         socklen_t flen;
-        int sock = ::accept(fd(), (struct sockaddr *)&fsin, &flen);
+        auto sock = ::accept(fd(), (struct sockaddr *)&fsin, &flen);
         Connection conn(FileDescriptor{sock});
         return conn;
     }
@@ -71,10 +71,10 @@ namespace net{
             // std::cout<<"Failure!"<<gai_strerror(errn)<<std::endl;
         }
         if(::connect(fd(), host->ai_addr, host->ai_addrlen) == 0){
-            std::cout<<"Success!"<<std::endl;
+            std::cout<<"Success connect!"<<std::endl;
         }
         else{
-            std::cout<<"Failure!"<<errno<<gai_strerror(errn)<<std::endl;
+            std::cout<<"Failure connect!"<<errno<<gai_strerror(errn)<<std::endl;
         }
         return Connection{std::move(fd_)};
     }
