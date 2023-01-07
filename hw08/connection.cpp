@@ -1,7 +1,8 @@
 #include "connection.h"
 #include <sys/socket.h>
 
-#define BUFLEN (20 << 20)
+#define BUFLEN_SHORT 129
+#define BUFLEN_ALL (20 << 20)
 
 namespace net{
     ssize_t send(int fd, std::span<const char> data){
@@ -32,16 +33,18 @@ namespace net{
     }
 
     ssize_t Connection::receive(std::ostream& stream) const{
-        char *buf=(char *)malloc(BUFLEN);
-        auto len = recv(fd(), buf, BUFLEN, 0);
+        char *buf=(char *)malloc(BUFLEN_SHORT);
+        auto len = recv(fd(), buf, 128, 0);
+        buf[len] = '\0';
         stream<<buf;
         free(buf);
         return len;
     }
 
     ssize_t Connection::receive_all(std::ostream& stream) const{
-        char *buf=(char *)malloc(BUFLEN);
-        auto len = recv(fd(), buf, BUFLEN, MSG_WAITALL);
+        char *buf=(char *)malloc(BUFLEN_ALL);
+        auto len = recv(fd(), buf, BUFLEN_ALL, MSG_WAITALL);
+        buf[len] = '\0';
         stream<<buf;
         free(buf);
         return len;
