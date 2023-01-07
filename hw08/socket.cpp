@@ -22,6 +22,8 @@ namespace net{
 
     Socket::Socket(){
         fd_ = FileDescriptor(socket(PF_INET, SOCK_STREAM, IPPROTO_TCP));
+        int iSetOption = 1;
+        setsockopt(fd(), SOL_SOCKET, SO_REUSEADDR, (char *)&iSetOption, sizeof(iSetOption));
     }
 
     void Socket::listen(uint16_t port) const{
@@ -30,10 +32,10 @@ namespace net{
         addr.sin_addr.s_addr = INADDR_ANY;
         addr.sin_port = htons(port);
         if(bind(fd(), (struct sockaddr *) &addr, sizeof(addr)) == 0){
-            // std::cout<<"Success!"<<std::endl;
+            std::cout<<"Success bind!"<<std::endl;
         }
         else{
-            // std::cout<<"Failure!"<<errno<<std::endl;
+            std::cout<<"Failure bind!"<<errno<<gai_strerror(errno)<<std::endl;
         }
         ::listen(fd(), 5);
     }
@@ -45,35 +47,29 @@ namespace net{
         struct	sockaddr_in fsin;
         socklen_t flen;
         auto sock = ::accept(fd(), (struct sockaddr *)&fsin, &flen);
-        Connection conn(FileDescriptor{sock});
-        return conn;
+        FileDescriptor fd{sock};
+        return Connection(std::move(fd));
+        /* Connection conn{FileDescriptor{sock}};
+        return conn; */
     }
 
     Connection Socket::connect(std::string destination, uint16_t port){
-        struct addrinfo *host;
         if (destination == "localhost")
         {
             destination = "127.0.0.1";
         }
         
-	    getaddrinfo((char*)&destination, (char*)&port, NULL, &host);
-        ::connect(fd(), host->ai_addr, host->ai_addrlen);
-        return Connection{std::move(fd_)};
-    }
-
-    Connection Socket::connect(uint16_t port){
-        struct addrinfo *host,hints;
+	    struct addrinfo *host,hints;
         memset(&hints, 0, sizeof(hints));
-        hints.ai_family = AF_INET;    /* Allow IPv4 or IPv6 */
-        hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
+        hints.ai_family = AF_INET;    /* Allow IPv4*/
+        hints.ai_socktype = SOCK_STREAM; 
         hints.ai_flags = AI_PASSIVE;    /* For wildcard IP address */
         hints.ai_protocol = 0;          /* Any protocol */
         hints.ai_canonname = NULL;
         hints.ai_addr = NULL;
         hints.ai_next = NULL;
         std::string p = std::to_string(port);
-        std::string destination = "127.0.0.1";
-	    auto errn = getaddrinfo((char*)&destination, (char*)&p, &hints, &host);
+	    auto errn = getaddrinfo(destination.c_str(), p.c_str(), &hints, &host);
         if(errn == 0){
             std::cout<<"Success getaddrinfo!"<<p<<std::endl;
         }
@@ -85,6 +81,36 @@ namespace net{
         }
         else{
             std::cout<<"Failure connect!"<<errno<<gai_strerror(errn)<<std::endl;
+            throw std::runtime_error("Connect error!");
+        }
+        return Connection{std::move(fd_)};
+    }
+
+    Connection Socket::connect(uint16_t port){
+        struct addrinfo *host,hints;
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_family = AF_INET;    /* Allow IPv4*/
+        hints.ai_socktype = SOCK_STREAM; 
+        hints.ai_flags = AI_PASSIVE;    /* For wildcard IP address */
+        hints.ai_protocol = 0;          /* Any protocol */
+        hints.ai_canonname = NULL;
+        hints.ai_addr = NULL;
+        hints.ai_next = NULL;
+        std::string p = std::to_string(port);
+        const char* destination = "127.0.0.1";
+	    auto errn = getaddrinfo(destination, p.c_str(), &hints, &host);
+        if(errn == 0){
+            std::cout<<"Success getaddrinfo!"<<p<<std::endl;
+        }
+        else{
+            std::cout<<"Failure getaddrinfo!"<<gai_strerror(errn)<<std::endl;
+        }
+        if(::connect(fd(), host->ai_addr, host->ai_addrlen) == 0){
+            std::cout<<"Success connect!"<<std::endl;
+        }
+        else{
+            std::cout<<"Failure connect!"<<errno<<gai_strerror(errn)<<std::endl;
+            throw std::runtime_error("Connect error!");
         }
         return Connection{std::move(fd_)};
     }
