@@ -106,7 +106,7 @@ TEST_CASE("Open a socket") {
 
     CHECK_NE(socket.fd(), fd);
   }
-}
+} 
 
 std::string random_string(std::string::size_type length) {
   auto randchar = []() -> char {
@@ -149,7 +149,7 @@ TEST_CASE("Connect multiple times from client") {
 
   server_thread.join();
   CHECK_THROWS(future.get());
-}
+} 
 
 TEST_CASE("Testing client server with short messages 1") {
   const std::string_view data = "Soo much data to send";
@@ -228,7 +228,7 @@ TEST_CASE("Test messages of size 129 can be send in one chunk") {
 
   CHECK_EQ(received.size(), 128);
   CHECK_UNARY(std::equal(received.begin(), received.end(), data.begin()));
-}
+} 
 
 TEST_CASE("Testing client server 1") {
   const std::string_view data = "Soo much data to send";
@@ -254,7 +254,8 @@ TEST_CASE("Testing client server 1") {
   auto received = future.get();
 
   CHECK_EQ(received, data);
-}
+}  
+
 
 TEST_CASE("Testing client server 2") {
   const std::string_view data = "rofl";
@@ -280,7 +281,7 @@ TEST_CASE("Testing client server 2") {
   auto received = future.get();
 
   CHECK_EQ(received, data);
-}
+} 
 
 TEST_CASE("Testing client server 3") {
   // Just create 100 random string of different lengths
@@ -311,7 +312,7 @@ TEST_CASE("Testing client server 3") {
 
     CHECK_EQ(received, data);
   }
-}
+} 
 
 TEST_CASE("Receiving large messages") {
   std::mt19937 rg{std::random_device{}()};
@@ -354,7 +355,7 @@ TEST_CASE("Receiving large messages") {
 
     CHECK_EQ(received, data);
   }
-}
+} 
 
 TEST_CASE("Testing multi client server") {
   const std::string data = random_string(200);
@@ -388,4 +389,4 @@ TEST_CASE("Testing multi client server") {
   CHECK_EQ(future4.get(), data);
   CHECK_EQ(future5.get(), data);
   server_thread.join();
-}
+}  
