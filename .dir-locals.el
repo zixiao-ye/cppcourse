@@ -3,4 +3,5 @@
 ((nil . ((indent-tabs-mode . nil)
          (tab-width . 4)))
  (cmake-mode . ((indent-tabs-mode . nil)))
- (c++-mode . ((c-file-style . "stroustrup"))))
+ (c++-mode . ((c-file-style . "stroustrup")
+              (c-file-offsets . ((innamespace . 0))))))

@@ -15,6 +15,8 @@
 
 TEST_CASE("Fibonacci_test") {
     static_assert(fibonacci<10>::value == 55);
+    static_assert(std::is_same_v<std::remove_cv_t<decltype(fibonacci<3, short>::value)>, short>)
+    static_assert(std::is_same_v<std::remove_cv_t<decltype(fibonacci<3, long>::value)>, long>)
     CHECK_EQ(fibonacci<0>::value, 0);
     CHECK_EQ(fibonacci<1>::value, 1);
     CHECK_EQ(fibonacci<5>::value, 5);
@@ -25,7 +27,7 @@ TEST_CASE("Fibonacci_test") {
 }
 
 TEST_CASE("Quadruple_mixed_1_test") {
-    Quadruple<int, int, int, std::string> quadruple(1, 2, 3, std::string("abc"));
+    Quadruple<int, int, int, std::string> quadruple{1, 2, 3, std::string("abc")};
     CHECK_EQ(quadruple.get_first(), 1);
     CHECK_EQ(quadruple.get_second(), 2);
     CHECK_EQ(quadruple.get_third(), 3);
@@ -33,12 +35,22 @@ TEST_CASE("Quadruple_mixed_1_test") {
 }
 
 TEST_CASE("Quadruple_mixed_2_test") {
-    Quadruple<int, double, double, std::string> quadruple(1, 2.0, 3.0,
-                                                          std::string("abc"));
+    Quadruple<int, double, double, std::string> quadruple{1, 2.0, 3.0,
+                                                          std::string("abc")};
     CHECK_EQ(quadruple.get_first(), 1);
     CHECK_EQ(quadruple.get_second(), 2.0);
     CHECK_EQ(quadruple.get_third(), 3.0);
     CHECK_EQ(quadruple.get_fourth(), std::string("abc"));
+}
+
+TEST_CASE("Quadruple_custom_type_test") {
+    struct rolf { int lol; };
+    Quadruple<rolf, double, double, rolf> quadruple{rolf{42}, 7.0, 28.0,
+                                                    rolf{1337}};
+    CHECK_EQ(quadruple.get_first(), rolf{42});
+    CHECK_EQ(quadruple.get_second(), 7.0);
+    CHECK_EQ(quadruple.get_third(), 28.0);
+    CHECK_EQ(quadruple.get_fourth(), rolf{1337});
 }
 
 TEST_CASE("Quadruple_partial_specialization_test") {
@@ -50,6 +62,7 @@ TEST_CASE("Quadruple_partial_specialization_test") {
 
     // check if member was created
     CHECK_EQ(quadruple.members.size(), 4);
+    CHECK_EQ(quadruple.members[3], 4);
 }
 
 TEST_CASE("Quadruple_full_specialization_test") {
@@ -61,6 +74,23 @@ TEST_CASE("Quadruple_full_specialization_test") {
 
     // check if member was created
     CHECK_EQ(quadruple.members.size(), 4);
+    CHECK_EQ(quadruple.members[3], 80.0);
+}
+
+
+TEST_CASE("Quadruple_full_specialization_customtype_test") {
+    struct rolf { int stuff; };
+    Quadruple<rolf, rolf, rolf, rolf> quadruple(1, 2, 4, 8);
+    CHECK_EQ(quadruple.get_first(), 1);
+    CHECK_EQ(quadruple.get_second(), 2);
+    CHECK_EQ(quadruple.get_third(), 4);
+    CHECK_EQ(quadruple.get_fourth(), 8);
+
+    CHECK_EQ(quadruple.members.size(), 4);
+    CHECK_EQ(quadruple.members[0].stuff, 1);
+    CHECK_EQ(quadruple.members[1].stuff, 2);
+    CHECK_EQ(quadruple.members[2].stuff, 4);
+    CHECK_EQ(quadruple.members[3].stuff, 8);
 }
 
 TEST_CASE("GCD_test") {
