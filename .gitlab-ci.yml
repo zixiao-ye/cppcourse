@@ -1,7 +1,7 @@
 variables:
-    CURRENT_HW: "hw10"
-    CURRENT_TEST: "testhw10"
-    TEST_HASH_EXPECTED: "76facbcf331f674514c5fd7c7fcb97ab1ce4c8071831638b78423cb2d5769aa5"
+    CURRENT_HW: "hw11"
+    CURRENT_TEST: "testhw11"
+    TEST_HASH_EXPECTED: "6bd7bf55872d19c2a019b93169cf12eca32e7a438c8ae41146b8c9d81afe93ec"
 
 # pre-verify test system hash
 before_script:
@@ -10,7 +10,7 @@ before_script:
 
   - echo $TEST_HASH
   - echo $TEST_HASH_EXPECTED
-  - if [[ "$TEST_HASH" == "$TEST_HASH_EXPECTED" ]]; then echo "hash ok for tests, CMakeLists.txt"; else echo -n "contents of tests, CMakeLists.txt are not as expected! to fix this, git restore -s upstream/master tests, CMakeLists.txt .gitlab-ci.yml"; exit 1; fi
+  - if [[ "$TEST_HASH" == "$TEST_HASH_EXPECTED" ]]; then echo "hash ok for tests, CMakeLists.txt"; else echo -n "contents of tests, CMakeLists.txt are not as expected! to fix this, git restore -s upstream/master tests CMakeLists.txt .gitlab-ci.yml"; exit 1; fi
   - export GCC_COLORS=yes
 
 stages:
