@@ -27,6 +27,7 @@ Logger::Logger(const std::string &filename) : file{} {
 
 Logger::~Logger() {
     // explicit file closing needed in Windows
+    file.close();
 }
 
 void Logger::log(const std::string &path, status what) const {

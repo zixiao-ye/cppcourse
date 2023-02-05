@@ -46,10 +46,11 @@ int main() {
     FileMonitor monitor{"./sandbox/", 1000ms};
 
     // Does stuff in the directory on a secondary thread!
-    std::jthread thread(update_directory, directory); // no need to join! 🤗
+    std::thread thread(update_directory, directory); // no need to join! 🤗
 
     std::cout << "Monitor has been started...\n";
     monitor.start(10s);
 
+    thread.join();
     return 0;
 }
