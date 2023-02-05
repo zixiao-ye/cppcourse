@@ -2,7 +2,7 @@
 
 #include<iostream>
 #include <thread>
-
+#include<vector>
 
 
 FileMonitor::FileMonitor(const std::string &targetpath,
@@ -39,20 +39,25 @@ void FileMonitor::start(std::chrono::seconds timeout) {
                 }
                 
             }
-            for (auto& it : m)
+            std::vector<std::string> vec;
+            for (auto it : m)
             {
                 if (!fs::exists(it.first))
                 {
                     logger.log(it.first, status::removed);
-                    m.erase(it.first);
-                }
-                
+                    vec.push_back(it.first);
+                }  
+            } 
+            for (auto& key : vec)
+            {
+                m.erase(key);
             }
+            
             flag += interval;
             if (end - std::chrono::system_clock::now() < interval)
                 break;
             
-        }
+        } 
     }
     //std::this_thread::sleep_for(std::chrono::microseconds(interval));
 }
