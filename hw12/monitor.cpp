@@ -19,7 +19,7 @@ void FileMonitor::start(std::chrono::seconds timeout) {
     flag = std::chrono::system_clock::now();
     end = std::chrono::system_clock::now() + timeout;
 
-    while(std::chrono::system_clock::now() < end) // still less than the end?
+    while(std::chrono::system_clock::now() < end) 
     {
         if (std::chrono::system_clock::now() > flag)
         {
@@ -49,10 +49,10 @@ void FileMonitor::start(std::chrono::seconds timeout) {
                 
             }
             flag += interval;
+            if (end - std::chrono::system_clock::now() < interval)
+                break;
+            
         }
-        
-        
-
     }
     //std::this_thread::sleep_for(std::chrono::microseconds(interval));
 }

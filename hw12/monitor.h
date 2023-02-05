@@ -30,6 +30,6 @@ public:
 private:
     Logger logger;
     std::chrono::duration<int, std::milli> interval;
-    const std::filesystem::path targetpath;
+    std::filesystem::path targetpath;
     std::unordered_map<std::string, fs::file_time_type> m;
 };
